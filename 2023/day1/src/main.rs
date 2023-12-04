@@ -1,10 +1,9 @@
 #![allow(dead_code)]
-
-use std::u32::MAX;
+use nom::Slice;
 fn main() {
-    let input = include_str!("example1");
-    part_one(input);
-    // part_two(input);
+    let input = include_str!("input");
+    //part_one(input);
+    part_two(input);
 }
 
 // zero one two three four five six seven eight nine
@@ -17,49 +16,57 @@ fn part_two(input: &str) {
     let lines = input.lines();
     for line in lines {
         println!("{line}");
-        let replaced = replace_words(line);
-        println!("{replaced}");
-        let line_number = get_line_number(&replaced);
-        println!("{line_number}");
-        sum += line_number;
+        let digits = find_digits(line);
+        println!("{digits}");
+        sum += digits;
     }
 
     println!("The total sum for part 2 is {sum}")
 }
 
-fn find_digits(line: &str) -> String {
-    let first_digit_idx = line.find(|c: char| c.is_ascii_digit()).unwrap();
-    let last_digit_idx = line.rfind(|c: char| c.is_ascii_digit()).unwrap();
+fn find_digits(line: &str) -> u32 {
+    let mut first_digit: u8 = 0;
+    let mut last_digit: u8 = 0;
 
+    // Get the actual words
+    let words = [
+        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+    ];
 
-    let words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
-
-    let mut first_word_idx = MAX;
-    let mut last_word_idx = MAX;
-    for word in words {
-        match line.find(word) {
-            Some(idx) => {
-                if idx < first_word_idx
+    'outer: for n in 1..line.len() + 1 {
+        let first_n = line.slice(0..n);
+        if first_n.chars().last().unwrap().is_ascii_digit() {
+            first_digit =
+                u8::try_from(first_n.chars().last().unwrap().to_digit(10).unwrap()).unwrap();
+            break;
+        }
+        for (i, word) in words.into_iter().enumerate() {
+            if first_n.contains(word) {
+                first_digit = u8::try_from(i).unwrap();
+                break 'outer;
             }
         }
     }
 
-    let first_word_idx = line.find()
-    todo!()
-}
+    'outer: for n in 0..line.len() {
+        let last_n = line.slice((line.len() - n - 1)..line.len());
+        //println!("{last_n}");
+        if last_n.chars().next().unwrap().is_ascii_digit() {
+            last_digit =
+                u8::try_from(last_n.chars().next().unwrap().to_digit(10).unwrap()).unwrap();
+            break;
+        }
+        for (i, word) in words.into_iter().enumerate() {
+            if last_n.contains(word) {
+                last_digit = u8::try_from(i).unwrap();
+                break 'outer;
+            }
+        }
+    }
 
-fn replace_words(line: &str) -> String {
-    let mut line = line.replace("zero", "0");
-    line = line.replace("one", "1");
-    line = line.replace("two", "2");
-    line = line.replace("three", "3");
-    line = line.replace("four", "4");
-    line = line.replace("five", "5");
-    line = line.replace("six", "6");
-    line = line.replace("seven", "7");
-    line = line.replace("eight", "8");
-    line = line.replace("nine", "9");
-    line
+    println!("First digit {first_digit}, Last digit {last_digit}");
+
+    format!("{first_digit}{last_digit}").parse::<u32>().unwrap()
 }
 
 fn part_one(input: &str) {

@@ -25,6 +25,8 @@ pub fn parse_card(input: &str) -> Card {
         id,
         winning,
         scratched,
+        matches: 0,
+        copies: 0,
     }
 }
 
@@ -56,7 +58,9 @@ mod tests {
             Card {
                 id: 1,
                 winning: vec![41, 48, 83, 86, 17],
-                scratched: vec![83, 86, 6, 31, 17, 9, 48, 53]
+                scratched: vec![83, 86, 6, 31, 17, 9, 48, 53],
+                matches: 0,
+                copies: 0
             }
         );
     }

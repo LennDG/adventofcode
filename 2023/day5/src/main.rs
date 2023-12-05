@@ -1,21 +1,35 @@
+mod parser;
+
 fn main() {
-    println!("Hello, world!");
+    let input = include_str!("example");
+    let almanac = parser::parse_almanac(input);
+    println!("{:?}", almanac)
 }
 
-pub struct Seeds {
-    seed_numbers: Vec<u32>,
+#[derive(Debug)]
+pub struct Almanac {
+    seeds: Vec<u32>,
+    maps: Vec<Map>,
 }
 
+impl Almanac {
+    fn map(&self, value: u32) -> u32 {
+        todo!()
+    }
+}
+
+#[derive(Debug)]
 pub struct MapLine {
     destination_range_start: u32,
     source_range_start: u32,
     range_length: u32,
 }
 
+#[derive(Debug)]
 pub struct Map {
     lines: Vec<MapLine>,
-    from: Source,
-    to: Source,
+    // from: Source,
+    // to: Source,
 }
 
 impl Map {
@@ -51,8 +65,8 @@ mod tests {
     #[test]
     fn test_map() {
         let map = Map {
-            from: Source::Seed,
-            to: Source::Soil,
+            // from: Source::Seed,
+            // to: Source::Soil,
             lines: vec![
                 MapLine {
                     destination_range_start: 50,

@@ -1,16 +1,28 @@
-use nom::{
-    bytes::complete::{tag, take_until},
-    character::complete::{digit1, multispace1, newline, space1},
-    combinator::map_res,
-    multi::{many1, separated_list1},
-    sequence::{terminated, tuple},
-    IResult,
-};
+use itertools::Itertools;
+
 mod parser;
 fn main() {
-    println!("Hello, world!");
+    let input = include_str!("example");
+    let calories = parser::parse_calories(input);
+    part_one(calories.clone());
+    part_two(calories);
 }
 
-// fn parse_input(input: &str) -> Vec<Vec<u32>> {
-//     let (_, calories) = separated_list1(newline, terminated(digit1, newline));
-// }
+fn part_one(calories: Vec<Vec<u64>>) {
+    let burdendest: u64 = calories.iter().map(|elf| elf.iter().sum()).max().unwrap();
+    println!("The burdendest elf has {burdendest} calories");
+}
+
+fn part_two(calories: Vec<Vec<u64>>) {
+    let top3: u64 = calories
+        .iter()
+        .map(|elf| elf.iter().sum())
+        .collect::<Vec<u64>>()
+        .iter()
+        .sorted()
+        .rev()
+        .take(3)
+        .sum();
+
+    println!("The sum of top 3 burdendest elves is {top3} calories");
+}

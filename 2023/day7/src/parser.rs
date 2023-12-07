@@ -12,7 +12,7 @@ use std::str::FromStr;
 pub fn parse_hands(input: &str) -> Vec<Hand> {
     let (_, hands) = separated_list1(
         newline,
-        separated_pair(parse_cards, multispace1, map_res(digit1, u32::from_str)),
+        separated_pair(parse_cards, multispace1, map_res(digit1, usize::from_str)),
     )(input)
     .unwrap();
 

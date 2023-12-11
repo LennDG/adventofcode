@@ -1,5 +1,3 @@
-use std::usize::MAX;
-
 fn main() {
     let input = include_str!("input");
 
@@ -19,7 +17,8 @@ fn main() {
     tiles.push(border);
 
     let pipes = Pipes::new(tiles);
-    part_one(pipes)
+    //part_one(pipes);
+    part_two(pipes)
 }
 
 fn part_one(pipes: Pipes) {
@@ -30,6 +29,58 @@ fn part_one(pipes: Pipes) {
     let length = path.len() / 2;
 
     println!("Length of the longest: {length}");
+}
+
+// Does not work correctly yet!
+fn part_two(pipes: Pipes) {
+    let path = get_loop(&pipes);
+    let mut area = 0;
+    for (y, line) in pipes.tiles.iter().enumerate() {
+        let mut inside = false;
+        let mut half_vertical: Option<Direction> = None;
+        for (x, tile) in line.iter().enumerate() {
+            if path.contains(&(x, y)) {
+                if tile.is_vertical() {
+                    inside = !inside;
+                } else {
+                    match half_vertical {
+                        Some(direction) => match direction {
+                            Direction::North => {
+                                if tile.get_vertical_component() == Some(Direction::South) {
+                                    inside = !inside;
+                                    half_vertical = None
+                                } else if tile.get_vertical_component() == Some(Direction::North) {
+                                    half_vertical = None
+                                }
+                            }
+                            Direction::South => {
+                                if tile.get_vertical_component() == Some(Direction::North) {
+                                    inside = !inside;
+                                    half_vertical = None
+                                } else if tile.get_vertical_component() == Some(Direction::South) {
+                                    half_vertical = None
+                                }
+                            }
+                            _ => (),
+                        },
+                        None => {
+                            if let Some(direction) = tile.get_vertical_component() {
+                                half_vertical = Some(direction)
+                            }
+                        }
+                    }
+                }
+            } else if inside {
+                area += 1;
+            }
+        }
+    }
+
+    println!("Total area inside loop is {area}");
+}
+
+fn get_loop(pipes: &Pipes) -> Vec<(usize, usize)> {
+    build_path(pipes, pipes.get_connecting_tiles(pipes.start)[0])
 }
 
 fn build_path(pipes: &Pipes, start: (usize, usize)) -> Vec<(usize, usize)> {
@@ -46,10 +97,15 @@ fn build_path(pipes: &Pipes, start: (usize, usize)) -> Vec<(usize, usize)> {
         prev = current;
         current = next;
     }
-    println!("{path:?}");
     path
 }
-pub struct Pipes {
+
+struct PathTile {
+    coordinates: (usize, usize),
+    direction: Direction,
+}
+
+struct Pipes {
     tiles: Vec<Vec<Tile>>,
     start: (usize, usize),
 }
@@ -66,6 +122,10 @@ impl Pipes {
         }
 
         Pipes { tiles, start }
+    }
+
+    fn get_tile(&self, (x, y): (usize, usize)) -> &Tile {
+        &self.tiles[y][x]
     }
 
     fn get_connecting_tiles(&self, (x1, y1): (usize, usize)) -> Vec<(usize, usize)> {
@@ -120,9 +180,23 @@ impl Tile {
     fn is_start(&self) -> bool {
         self.0.len() == 4
     }
+
+    fn is_vertical(&self) -> bool {
+        self.0.contains(&Direction::North) && self.0.contains(&Direction::South)
+    }
+
+    fn get_vertical_component(&self) -> Option<Direction> {
+        if self.0.contains(&Direction::North) {
+            Some(Direction::North)
+        } else if self.0.contains(&Direction::South) {
+            Some(Direction::South)
+        } else {
+            None
+        }
+    }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 enum Direction {
     North,
     East,
@@ -152,7 +226,7 @@ impl TryFrom<char> for Tile {
             'J' => Ok(Tile(vec![Direction::North, Direction::West])),
             '7' => Ok(Tile(vec![Direction::South, Direction::West])),
             'F' => Ok(Tile(vec![Direction::South, Direction::East])),
-            _ => Err(color_eyre::eyre::eyre!("not a valid tile: {c:?}")),
+            _ => Ok(Tile(vec![])),
         }
     }
 }

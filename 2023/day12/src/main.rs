@@ -5,7 +5,21 @@ mod parser;
 fn main() {
     let input = include_str!("example");
     let condition_reports = parser::parse_condition_reports(input);
-    println!("{condition_reports:?}")
+    part_one(condition_reports)
+}
+
+fn part_one(condition_reports: Vec<ConditionReport>) {}
+
+// Checks up to the first Unknown if the conditions match the groups
+fn check_finished(report: &ConditionReport) -> bool {
+    let finished: Vec<Condition> = report
+        .conditions
+        .iter()
+        .take_while(|c| **c != Condition::Unknown)
+        .cloned()
+        .collect();
+
+    false
 }
 
 #[derive(Debug, Clone)]

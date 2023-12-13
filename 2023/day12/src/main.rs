@@ -3,7 +3,7 @@ use color_eyre::eyre::Ok;
 mod parser;
 
 fn main() {
-    let input = include_str!("test_check_finished");
+    let input = include_str!("test_check_cont");
     let condition_reports = parser::parse_condition_reports(input);
     part_one(condition_reports)
 }
@@ -11,9 +11,8 @@ fn main() {
 fn part_one(condition_reports: Vec<ConditionReport>) {}
 
 // Checks up to the first Unknown if the conditions match the groups
-fn check_contiguous_groups(report: &ConditionReport) -> bool {
-    let finished: Vec<Condition> = report
-        .conditions
+fn check_contiguous_groups(conditions: &[Condition], checked_groups: Vec<u64>) -> bool {
+    let finished: Vec<Condition> = conditions
         .iter()
         .take_while(|c| **c != Condition::Unknown)
         .cloned()
@@ -38,7 +37,11 @@ fn check_contiguous_groups(report: &ConditionReport) -> bool {
         groups.push(last)
     }
 
-    groups.iter().zip(report.groups.iter()).all(|(a, b)| a == b)
+    groups.len() >= checked_groups.len()
+        && groups
+            .iter()
+            .zip(checked_groups.iter())
+            .all(|(a, b)| a == b)
 }
 
 #[derive(Debug, Clone)]
